@@ -1,0 +1,23 @@
+@import "../../styles/variables.scss";
+
+.tableColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.column {
+  padding: 15px;
+  background-color: $light-grey;
+  border-radius: 15px;
+  height: 83vh;
+  overflow: auto;
+
+  &>*:not(:last-child) {
+    margin-bottom: 10px;
+  }
+}

@@ -1,0 +1,33 @@
+.githubKanbanBoard {
+
+}
+
+.topBlock {
+  display: flex;
+  padding: 10px 15px;
+
+
+  &>*:not(:last-child) {
+    margin-right: 10px;
+  }
+  &__button {
+    border-radius:5px;
+  }
+  &__input {
+    border-radius: 5px;
+  }
+}
+
+.board {
+  display: flex;
+  padding: 10px;
+
+
+  &>* {
+    flex: 0 1 33.333%;
+  }
+
+  &>*:not(:last-child) {
+    margin-right: 25px;
+  }
+}
