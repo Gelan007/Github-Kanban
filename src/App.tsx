@@ -78,7 +78,7 @@ function App() {
         )}
       </div>*/
       <div>
-        <GithubKanbanBoard></GithubKanbanBoard>
+        <GithubKanbanBoardContainer></GithubKanbanBoardContainer>
       </div>
   );
 }
