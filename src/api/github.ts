@@ -16,9 +16,9 @@ const getValidUrlFormat = (inputUrl: string): string => {
     if (parts.length === 7 && parts[3] === 'repos') {
         return inputUrl;
     } else if (parts.length === 6) {
-        return `https://api.github.com/repos/${parts[4]}/${parts[5]}/issues`;
-    } else if (parts.length === 5 && parts[2] === "github.com") {
-        return `https://api.github.com/repos/${parts[3]}/${parts[4]}/issues`;
+        return `https://api.github.com/repos/${parts[4]}/${parts[5]}/issues?state=all`;
+    } else if (parts[2] === "github.com") {
+        return `https://api.github.com/repos/${parts[3]}/${parts[4]}/issues?state=all`;
     }
 
     return ''

@@ -1,20 +1,32 @@
 import React, {useEffect, useState} from 'react';
 import GithubKanbanBoard from "./GithubKanbanBoard";
-import {githubAPI} from "../../api/github";
-import axios, {AxiosResponse} from "axios";
 import {GitHubIssue} from "../../interfaces/github";
+import {connect} from "react-redux";
+import {AppRootStateType} from "../../redux/store";
+import {setIssues, addMoreIssues, getIssues} from "../../redux/slices/kanban-board-slice";
 
 
-const GithubKanbanBoardContainer = () => {
-    const [issues, setIssues] = useState<GitHubIssue[]>([]);
+
+type MapStatePropsType = {
+    issues: GitHubIssue[]
+    issuesHeaderLink: string
+}
+type MapDispatchPropsType = {
+    setIssues: (issues: GitHubIssue) => void
+    addMoreIssues: (issues: GitHubIssue) => void
+    getIssues: (payload: {url: string, isLoadMoreData: boolean}) => void
+}
+type OwnPropsType = {}
+
+type BooksContainerProps = MapStatePropsType & MapDispatchPropsType & OwnPropsType
+
+
+const GithubKanbanBoardContainer: React.FC<BooksContainerProps> = (props) => {
     const [nextPageUrl, setNextPageUrl] = useState<string | null>(null);
-
-    useEffect(() => {
-        fetchData()
-    }, []);
+    const [userInput, setUserInput] = useState<string>('');
 
     const fetchData = async () => {
-        await handleDataFetching("https://github.com/octocat/hello-worId", false)
+        await handleDataFetching(userInput, false)
     };
 
     const loadMoreData = async () => {
@@ -25,15 +37,12 @@ const GithubKanbanBoardContainer = () => {
 
      const handleDataFetching = async (url: string, isLoadMoreData: boolean) => {
         try {
-            const response = await githubAPI.getIssues(url, isLoadMoreData);
-            const { data, headers } = response;
-            !isLoadMoreData ? setIssues(data) : setIssues((prevIssues) => [...prevIssues, ...data]);
-
-            if (headers.link) {
-                setNextPage(headers.link)
+            props.getIssues({url, isLoadMoreData});
+            if (props.issuesHeaderLink) {
+                setNextPage(props.issuesHeaderLink)
             }
         } catch (error) {
-            console.error('Error fetching more data:', error);
+            console.error('Error fetching data:', error);
         }
     }
 
@@ -52,17 +61,28 @@ const GithubKanbanBoardContainer = () => {
 
 
     return (
-        <div>
+        /*<div>
             <h1>GitHub Issues</h1>
             <ul>
-                {issues.map((issue) => (
+                {props.issues.map((issue) => (
                     <li key={issue.id}>{issue.title}</li>
                 ))}
             </ul>
             {nextPageUrl && <button onClick={loadMoreData}>Load More</button>}
-        </div>
-        // <GithubKanbanBoard></GithubKanbanBoard>
+        </div>*/
+        <GithubKanbanBoard issues={props.issues} userInput={userInput}
+                           setUserInput={setUserInput} fetchData={fetchData}
+        />
     );
 };
 
-export default GithubKanbanBoardContainer;
+const mapStateToProps = (state: AppRootStateType): MapStatePropsType => {
+    return {
+        issues: state.kanbanBoard.issues,
+        issuesHeaderLink: state.kanbanBoard.issuesHeaderLink
+    }
+}
+
+export default connect<MapStatePropsType, MapDispatchPropsType, OwnPropsType, AppRootStateType>
+(mapStateToProps, {setIssues, addMoreIssues, getIssues})(GithubKanbanBoardContainer);
+

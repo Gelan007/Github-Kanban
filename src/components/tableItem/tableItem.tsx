@@ -1,18 +1,24 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import s from "./tableItem.module.scss"
+import {formatDistanceToNow} from "date-fns";
+import {getTransformedDate} from "../../utils/date";
 
 interface TableItemProps {
     title: string
-    mainInfo: string
-    secondaryInfo: string
+    number: number
+    createdAt: Date
+    user: string
+    comments: number
 }
-// Here will be another information, not just mainInfo or secondaryInfo
-const TableItem: React.FC<TableItemProps> = ({title, mainInfo, secondaryInfo}) => {
+
+const TableItem: React.FC<TableItemProps> = (props) => {
+    const transformedDate: string = getTransformedDate(props.createdAt);
+
     return (
         <div className={s.tableItem}>
-            <div className={s.title}>{title}</div>
-            <div className={s.mainInfo}>{mainInfo}</div>
-            <div className={s.secondaryInfo}>{secondaryInfo}</div>
+            <div className={s.title}>{props.title}</div>
+            <div className={s.mainInfo}>{`${props.number} opened ${transformedDate}`}</div>
+            <div className={s.secondaryInfo}>{`${props.user} | Comments: ${props.comments}`}</div>
         </div>
     );
 };
