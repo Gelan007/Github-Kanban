@@ -48,9 +48,9 @@ const kanbanBoardSlice = createSlice({
             .addCase(getIssues.fulfilled, (state, action) => {
                 state.isLoading = false;
 
-                const issues = action.payload.isLoadMoreData
+                const issues = Array.isArray(action.payload.data) && (action.payload.isLoadMoreData
                     ? [...state.issues, ...action.payload.data]
-                    : action.payload.data;
+                    : action.payload.data) || [];
 
                 state.issues = issues;
                 state.issuesHeaderLink = action.payload.link;
