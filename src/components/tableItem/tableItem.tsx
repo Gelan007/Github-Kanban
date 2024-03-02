@@ -17,7 +17,7 @@ const TableItem: React.FC<TableItemProps> = (props) => {
     return (
         <div className={s.tableItem}>
             <div className={s.title}>{props.title}</div>
-            <div className={s.mainInfo}>{`${props.number} opened ${transformedDate}`}</div>
+            <div className={s.mainInfo}>{`#${props.number} opened ${transformedDate}`}</div>
             <div className={s.secondaryInfo}>{`${props.user} | Comments: ${props.comments}`}</div>
         </div>
     );
