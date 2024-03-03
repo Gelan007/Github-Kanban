@@ -1,6 +1,7 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import {GitHubIssue} from "../../interfaces/github";
 import {githubAPI} from "../../api/github";
+import {getIssueObjectFromSessionStorageIfExists} from "./kanban-board-utils";
 
 const ISSUES = "issues";
 export const getIssues = createAsyncThunk(
@@ -14,8 +15,6 @@ export const getIssues = createAsyncThunk(
         throw new Error('Failed to fetch issues');
     }
 });
-
-
 
 type KanbanBoardInitialState = {
     isLoading: boolean
@@ -77,21 +76,6 @@ const kanbanBoardSlice = createSlice({
             })
     }
 })
-
-const getIssueObjectFromSessionStorageIfExists = (issueId: number, sessionStorageIssues: GitHubIssue[]):
-    { index: number, issue: GitHubIssue | null} => {
-    const storedIssueIndex = sessionStorageIssues.findIndex(issue => issue.id === issueId);
-    if (storedIssueIndex === -1) {
-        return {index: -1, issue: null}
-    }
-
-    return {index: storedIssueIndex, issue: sessionStorageIssues[storedIssueIndex]};
-}
-/*const getFinalCombinedIssues = (payloadIssues: GitHubIssue[]): GitHubIssue[] => {
-    const issueData = getIssueObjectFromSessionStorageIfExists(action.payload.issue.id, state.sessionStorageIssues);
-
-}*/
-
 
 export const {setIssues, addMoreIssues, setIssueToSessionStorage} = kanbanBoardSlice.actions;
 export default kanbanBoardSlice.reducer;

@@ -2,18 +2,19 @@ import React, {Dispatch, SetStateAction, useEffect, useState} from 'react';
 import {Button, Card, Col, Container, Form, InputGroup, ListGroup, Row} from "react-bootstrap";
 import s from "./GithubKanbanBoard.module.scss"
 import TableColumn from "../tableColumn/tableColumn";
-import TableItem from "../tableItem/tableItem";
+import TableItem, {TableItemProps} from "../tableItem/tableItem";
 import {GitHubIssue} from "../../interfaces/github";
+import {GroupedIssuesWithTitles} from "./GithubKanbanBoardContainer";
 
 type GithubKanbanBoardProps = {
     issues: GitHubIssue[]
     userInput: string
+    groupedIssues: GroupedIssuesWithTitles[]
     setUserInput: Dispatch<SetStateAction<string>>
     fetchData: () => void
 }
 
 const GithubKanbanBoard: React.FC<GithubKanbanBoardProps> = ({issues, userInput, setUserInput, ...props}) => {
-
 
     return (
         <div className={s.githubKanbanBoard}>
@@ -35,50 +36,21 @@ const GithubKanbanBoard: React.FC<GithubKanbanBoardProps> = ({issues, userInput,
                 </Button>
             </InputGroup>
             <div className={s.board}>
-                <TableColumn header={"ToDo"}>
-                    {Array.isArray(issues) && issues
-                        .filter(issue => !issue.assignee && issue.state === "open")
-                        .map(issue => (
-                            <TableItem
-                                title={issue.title}
-                                comments={issue.comments}
-                                createdAt={issue.created_at}
-                                number={issue.number}
-                                user={issue.user.login}
-                                key={issue.id}
-                            />
-                        ))}
-                </TableColumn>
-
-                <TableColumn header={"In Progress"}>
-                    {Array.isArray(issues) && issues
-                        .filter(issue => issue.assignee && issue.state === "open")
-                        .map(issue => (
-                            <TableItem
-                                title={issue.title}
-                                comments={issue.comments}
-                                createdAt={issue.created_at}
-                                number={issue.number}
-                                user={issue.user.login}
-                                key={issue.id}
-                            />
-                        ))}
-                </TableColumn>
-
-                <TableColumn header={"Done"}>
-                    {Array.isArray(issues) && issues
-                        .filter(issue => issue.state === "closed")
-                        .map(issue => (
-                            <TableItem
-                                title={issue.title}
-                                comments={issue.comments}
-                                createdAt={issue.created_at}
-                                number={issue.number}
-                                user={issue.user.login}
-                                key={issue.id}
-                            />
-                        ))}
-                </TableColumn>
+                {props.groupedIssues.map(board => (
+                    <TableColumn header={board.title}>
+                        {Array.isArray(board.items) && board.items
+                            .map(issue => (
+                                <TableItem
+                                    title={issue.title}
+                                    comments={issue.comments}
+                                    createdAt={issue.created_at}
+                                    number={issue.number}
+                                    user={issue.user.login}
+                                    key={issue.id}
+                                />
+                            ))}
+                    </TableColumn>
+                ))}
             </div>
         </div>
     );

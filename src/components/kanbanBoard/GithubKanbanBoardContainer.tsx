@@ -4,6 +4,7 @@ import {GitHubIssue} from "../../interfaces/github";
 import {connect} from "react-redux";
 import {AppRootStateType} from "../../redux/store";
 import {setIssues, addMoreIssues, getIssues} from "../../redux/slices/kanban-board-slice";
+import {getGroupedIssues, GroupedIssues} from "../../redux/slices/kanban-board-utils";
 
 
 
@@ -19,8 +20,10 @@ type MapDispatchPropsType = {
 type OwnPropsType = {}
 
 type BooksContainerProps = MapStatePropsType & MapDispatchPropsType & OwnPropsType
-
-
+export interface GroupedIssuesWithTitles {
+    title: string
+    items?: GitHubIssue[]
+}
 const GithubKanbanBoardContainer: React.FC<BooksContainerProps> = (props) => {
     const [nextPageUrl, setNextPageUrl] = useState<string | null>(null);
     const [userInput, setUserInput] = useState<string>('');
@@ -59,6 +62,16 @@ const GithubKanbanBoardContainer: React.FC<BooksContainerProps> = (props) => {
         }
     }
 
+    const getGroupedIssuesWithTitles = (): GroupedIssuesWithTitles[] => {
+        const issues: GroupedIssuesWithTitles[] = [
+            {title: "ToDo", items: getGroupedIssues(props.issues).todoIssues},
+            {title: "In progress", items: getGroupedIssues(props.issues).inProgressIssues},
+            {title: "Done", items: getGroupedIssues(props.issues).doneIssues},
+        ]
+
+        return issues;
+    }
+
 
     return (
         /*<div>
@@ -72,6 +85,8 @@ const GithubKanbanBoardContainer: React.FC<BooksContainerProps> = (props) => {
         </div>*/
         <GithubKanbanBoard issues={props.issues} userInput={userInput}
                            setUserInput={setUserInput} fetchData={fetchData}
+                           groupedIssues={getGroupedIssuesWithTitles()}
+
         />
     );
 };
