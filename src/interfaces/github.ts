@@ -1,3 +1,5 @@
+import {IssueState} from "./enums";
+
 export type GitHubIssue = {
     assignee: any
     id: number
@@ -6,6 +8,16 @@ export type GitHubIssue = {
     created_at: Date
     user: {login: string, type: string}
     comments: number
-    state: "open" | "closed"
+    state: IssueState.Open | IssueState.Closed
 }
 
+export type GroupedIssues = {
+    todoIssues?: GitHubIssue[];
+    inProgressIssues?: GitHubIssue[];
+    doneIssues?: GitHubIssue[];
+}
+
+export interface GroupedIssuesWithTitles {
+    title: string
+    items?: GitHubIssue[]
+}

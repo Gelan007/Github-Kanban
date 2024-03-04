@@ -1,10 +1,7 @@
-import {GitHubIssue} from "../../interfaces/github";
+import {GitHubIssue, GroupedIssues, GroupedIssuesWithTitles} from "../../interfaces/github";
+import {BoardTitles, IssueState} from "../../interfaces/enums";
 
-export type GroupedIssues = {
-    todoIssues?: GitHubIssue[];
-    inProgressIssues?: GitHubIssue[];
-    doneIssues?: GitHubIssue[];
-}
+
 
 
 export const getIssueObjectFromSessionStorageIfExists = (issueId: number, sessionStorageIssues: GitHubIssue[]):
@@ -42,6 +39,21 @@ export const getGroupedIssues = (issues: GitHubIssue[]): GroupedIssues => {
     return groupedIssues;
 };
 
-const checkIsIssueTodo = (issue: GitHubIssue): boolean => !issue.assignee && issue.state === "open"
-const checkIsIssueInProgress = (issue: GitHubIssue): boolean => issue.assignee && issue.state === "open"
-const checkIsIssueDone = (issue: GitHubIssue): boolean => issue.state === "closed"
+export const getGroupedIssuesWithoutTitles = (issues: GroupedIssuesWithTitles): GroupedIssues => {
+    const groupedIssues: GroupedIssues = {}
+    if(issues.title === BoardTitles.ToDo) {
+        groupedIssues.todoIssues = issues.items
+    }
+    if(issues.title === BoardTitles.InProgress) {
+        groupedIssues.inProgressIssues = issues.items
+    }
+    if(issues.title === BoardTitles.Done) {
+        groupedIssues.doneIssues = issues.items
+    }
+
+    return groupedIssues;
+}
+
+const checkIsIssueTodo = (issue: GitHubIssue): boolean => !issue.assignee && issue.state === IssueState.Open
+const checkIsIssueInProgress = (issue: GitHubIssue): boolean => issue.assignee && issue.state === IssueState.Open
+const checkIsIssueDone = (issue: GitHubIssue): boolean => issue.state === IssueState.Closed

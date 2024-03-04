@@ -3,12 +3,16 @@ import s from "./tableColumn.module.scss"
 
 interface TableColumnProps {
     header: string
-    children: ReactNode
+    children: ReactNode,
+    dragProps: {
+        onDragOver?: (e: React.DragEvent<HTMLDivElement>) => void
+        onDrop?: (e: React.DragEvent<HTMLDivElement>) => void
+    }
 }
 
-const TableColumn:React.FC<TableColumnProps> = ({header, children}) => {
+const TableColumn:React.FC<TableColumnProps> = ({header, children, dragProps}) => {
     return (
-        <div className={s.tableColumn}>
+        <div className={s.tableColumn} {...dragProps}>
             <h4 className={s.header}>{header}</h4>
             <div className={s.column}>
                 {children}

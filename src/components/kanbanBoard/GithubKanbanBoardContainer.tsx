@@ -1,32 +1,38 @@
 import React, {useEffect, useState} from 'react';
 import GithubKanbanBoard from "./GithubKanbanBoard";
-import {GitHubIssue} from "../../interfaces/github";
+import {GitHubIssue, GroupedIssues, GroupedIssuesWithTitles} from "../../interfaces/github";
 import {connect} from "react-redux";
 import {AppRootStateType} from "../../redux/store";
-import {setIssues, addMoreIssues, getIssues} from "../../redux/slices/kanban-board-slice";
-import {getGroupedIssues, GroupedIssues} from "../../redux/slices/kanban-board-utils";
+import {
+    setIssues,
+    addMoreIssues,
+    getIssues,
+    updateAllGroupedIssues,
+    addGroupedIssues
+} from "../../redux/slices/kanban-board-slice";
+import {BoardTitles} from "../../interfaces/enums";
 
 
 
 type MapStatePropsType = {
     issues: GitHubIssue[]
     issuesHeaderLink: string
+    groupedIssues: GroupedIssues
 }
 type MapDispatchPropsType = {
     setIssues: (issues: GitHubIssue) => void
+    updateAllGroupedIssues: (payload: {groupedIssues: GroupedIssuesWithTitles[]}) => void
     addMoreIssues: (issues: GitHubIssue) => void
     getIssues: (payload: {url: string, isLoadMoreData: boolean}) => void
+    addGroupedIssues: (payload: {item: GitHubIssue, title: string}) => void
 }
 type OwnPropsType = {}
 
 type BooksContainerProps = MapStatePropsType & MapDispatchPropsType & OwnPropsType
-export interface GroupedIssuesWithTitles {
-    title: string
-    items?: GitHubIssue[]
-}
+
 const GithubKanbanBoardContainer: React.FC<BooksContainerProps> = (props) => {
     const [nextPageUrl, setNextPageUrl] = useState<string | null>(null);
-    const [userInput, setUserInput] = useState<string>('');
+    const [userInput, setUserInput] = useState<string>('https://github.com/Gelan007/QuestRoad-front/issues');
 
     const fetchData = async () => {
         await handleDataFetching(userInput, false)
@@ -64,9 +70,9 @@ const GithubKanbanBoardContainer: React.FC<BooksContainerProps> = (props) => {
 
     const getGroupedIssuesWithTitles = (): GroupedIssuesWithTitles[] => {
         const issues: GroupedIssuesWithTitles[] = [
-            {title: "ToDo", items: getGroupedIssues(props.issues).todoIssues},
-            {title: "In progress", items: getGroupedIssues(props.issues).inProgressIssues},
-            {title: "Done", items: getGroupedIssues(props.issues).doneIssues},
+            {title: BoardTitles.ToDo, items: props.groupedIssues.todoIssues},
+            {title: BoardTitles.InProgress, items: props.groupedIssues.inProgressIssues},
+            {title: BoardTitles.Done, items: props.groupedIssues.doneIssues},
         ]
 
         return issues;
@@ -85,7 +91,9 @@ const GithubKanbanBoardContainer: React.FC<BooksContainerProps> = (props) => {
         </div>*/
         <GithubKanbanBoard issues={props.issues} userInput={userInput}
                            setUserInput={setUserInput} fetchData={fetchData}
-                           groupedIssues={getGroupedIssuesWithTitles()}
+                           boards={getGroupedIssuesWithTitles()}
+                           setBoards={props.updateAllGroupedIssues}
+                           addGroupedIssues={props.addGroupedIssues}
 
         />
     );
@@ -94,10 +102,11 @@ const GithubKanbanBoardContainer: React.FC<BooksContainerProps> = (props) => {
 const mapStateToProps = (state: AppRootStateType): MapStatePropsType => {
     return {
         issues: state.kanbanBoard.issues,
-        issuesHeaderLink: state.kanbanBoard.issuesHeaderLink
+        issuesHeaderLink: state.kanbanBoard.issuesHeaderLink,
+        groupedIssues: state.kanbanBoard.groupedIssues
     }
 }
 
 export default connect<MapStatePropsType, MapDispatchPropsType, OwnPropsType, AppRootStateType>
-(mapStateToProps, {setIssues, addMoreIssues, getIssues})(GithubKanbanBoardContainer);
+(mapStateToProps, {setIssues, addMoreIssues, getIssues, updateAllGroupedIssues, addGroupedIssues})(GithubKanbanBoardContainer);
 
