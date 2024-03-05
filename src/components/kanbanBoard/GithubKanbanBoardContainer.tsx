@@ -13,6 +13,7 @@ import {
 import {BoardTitles} from "../../interfaces/enums";
 import {getGroupedIssuesWithTitles} from "../../redux/utils/kanban-board-slice-utils";
 import Spinner from 'react-bootstrap/Spinner';
+import {useIssuesDataFetching} from "../../hooks/board/useIssuesDataFetching";
 
 
 type MapStatePropsType = {
@@ -34,46 +35,22 @@ type OwnPropsType = {}
 type BooksContainerProps = MapStatePropsType & MapDispatchPropsType & OwnPropsType
 
 const GithubKanbanBoardContainer: React.FC<BooksContainerProps> = (props) => {
-    const [nextPageUrl, setNextPageUrl] = useState<string | null>(null);
     const [userInput, setUserInput] = useState<string>('https://github.com/Gelan007/QuestRoad-front/issues');
+    const {handleDataFetching} = useIssuesDataFetching();
 
     const fetchData = async () => {
         await handleDataFetching(userInput, false)
     };
 
-    const loadMoreData = async () => {
+    /*const loadMoreData = async () => {
         if(nextPageUrl) {
             await handleDataFetching(nextPageUrl, true)
         }
-    };
-
-     const handleDataFetching = async (url: string, isLoadMoreData: boolean) => {
-        try {
-            props.getIssues({url, isLoadMoreData});
-            if (props.issuesHeaderLink) {
-                setNextPage(props.issuesHeaderLink)
-            }
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    }
-
-    const setNextPage = (headerLink: string) => {
-        const links = headerLink.split(', ');
-        for (const link of links) {
-            const [url, rel] = link.split('; ');
-            const parsedUrl = url.slice(1, -1);
-            const parsedRel = rel.slice(5, -1);
-            if (parsedRel === 'next') {
-                setNextPageUrl(parsedUrl);
-                break;
-            }
-        }
-    }
+    };*/
 
 
     return (
-        /*<div>
+       /* <div>
             <h1>GitHub Issues</h1>
             <ul>
                 {props.issues.map((issue) => (

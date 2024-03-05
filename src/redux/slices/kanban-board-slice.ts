@@ -28,6 +28,7 @@ type KanbanBoardInitialState = {
     groupedIssues: GroupedIssues
     sessionStorageIssues: GitHubIssue[]
     issuesHeaderLink: string
+    nextPageUrl: string | null
 }
 
 const initialState: KanbanBoardInitialState = {
@@ -35,7 +36,8 @@ const initialState: KanbanBoardInitialState = {
     sessionStorageIssues: [],
     issues: [],
     groupedIssues: {},
-    issuesHeaderLink: ""
+    issuesHeaderLink: "",
+    nextPageUrl: null
 }
 
 const kanbanBoardSlice = createSlice({
@@ -48,7 +50,18 @@ const kanbanBoardSlice = createSlice({
         addMoreIssues: (state, action) => {
             state.issues = [...state.issues, ...action.payload]
         },
-
+        setNextPageUrl: (state, action: {payload: {headerLink: string}}) => {
+            const links = action.payload.headerLink.split(', ');
+            for (const link of links) {
+                const [url, rel] = link.split('; ');
+                const parsedUrl = url.slice(1, -1);
+                const parsedRel = rel.slice(5, -1);
+                if (parsedRel === 'next') {
+                    state.nextPageUrl = parsedUrl;
+                    break;
+                }
+            }
+        },
         setIssueToSessionStorage: (state, action: { payload: { issue: GitHubIssue, status: BoardTitles } }) => {
             const storedIssues = state.sessionStorageIssues;
             const issueWithStatus = {...action.payload.issue, storageStatus: action.payload.status };
@@ -127,6 +140,7 @@ export const {setIssues,
     addMoreIssues,
     setIssueToSessionStorage,
     updateAllGroupedIssues,
-    addGroupedIssues
+    addGroupedIssues,
+    setNextPageUrl
 } = kanbanBoardSlice.actions;
 export default kanbanBoardSlice.reducer;
