@@ -18,6 +18,18 @@
   }
 }
 
+.boardContainer {
+  display: flex;
+  flex-direction: column;
+
+  &__spinner {
+    align-self: center;
+    width: 4rem;
+    height: 4rem;
+    margin-top: 30vh;
+  }
+}
+
 .board {
   display: flex;
   padding: 10px;

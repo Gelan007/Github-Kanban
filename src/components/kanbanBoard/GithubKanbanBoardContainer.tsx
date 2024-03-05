@@ -12,13 +12,14 @@ import {
 } from "../../redux/slices/kanban-board-slice";
 import {BoardTitles} from "../../interfaces/enums";
 import {getGroupedIssuesWithTitles} from "../../redux/utils/kanban-board-slice-utils";
-
+import Spinner from 'react-bootstrap/Spinner';
 
 
 type MapStatePropsType = {
     issues: GitHubIssue[]
     issuesHeaderLink: string
     groupedIssues: GroupedIssues
+    isLoading: boolean
 }
 type MapDispatchPropsType = {
     setIssues: (issues: GitHubIssue) => void
@@ -87,6 +88,7 @@ const GithubKanbanBoardContainer: React.FC<BooksContainerProps> = (props) => {
                            setBoards={props.updateAllGroupedIssues}
                            addGroupedIssues={props.addGroupedIssues}
                            setIssueToSessionStorage={props.setIssueToSessionStorage}
+                           isLoading={props.isLoading}
 
         />
     );
@@ -96,7 +98,8 @@ const mapStateToProps = (state: AppRootStateType): MapStatePropsType => {
     return {
         issues: state.kanbanBoard.issues,
         issuesHeaderLink: state.kanbanBoard.issuesHeaderLink,
-        groupedIssues: state.kanbanBoard.groupedIssues
+        groupedIssues: state.kanbanBoard.groupedIssues,
+        isLoading: state.kanbanBoard.isLoading
     }
 }
 

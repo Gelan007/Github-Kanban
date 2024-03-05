@@ -6,12 +6,14 @@ import TableItem, {TableItemProps} from "../tableItem/tableItem";
 import {GitHubIssue, GroupedIssuesWithTitles} from "../../interfaces/github";
 import {useBoardActions} from "../../hooks/board/useBoardActions";
 import {BoardTitles} from "../../interfaces/enums";
+import Spinner from "react-bootstrap/Spinner";
 
 
 type GithubKanbanBoardProps = {
     issues: GitHubIssue[]
     userInput: string
     boards: GroupedIssuesWithTitles[]
+    isLoading: boolean
     setUserInput: Dispatch<SetStateAction<string>>
     fetchData: () => void
     setBoards: (payload: {groupedIssues: GroupedIssuesWithTitles[]}) => void
@@ -90,37 +92,45 @@ const GithubKanbanBoard: React.FC<GithubKanbanBoardProps> = ({issues, userInput,
                     Load issues
                 </Button>
             </InputGroup>
-            <div className={s.board}>
-                {props.boards.map(board => (
-                    <TableColumn
-                        header={board.title}
-                        dragProps={{
-                            onDragOver: (e) => dragOverHandler(e),
-                            onDrop: (e) => dropColumnHandler(e, board),
-                        }}
-                    >
-                        {Array.isArray(board.items) && board.items
-                            .map(issue => (
-                                <TableItem
+            <div className={s.boardContainer}>
+                {
+                    props.isLoading
+                        ?
+                        <Spinner animation={"border"} variant={"secondary"} className={s.boardContainer__spinner}/>
+                        :
+                        <div className={s.board}>
+                            {props.boards.map(board => (
+                                <TableColumn
+                                    header={board.title}
                                     dragProps={{
-                                        draggable: true,
-                                        onDragStart: (e) => dragStartHandler(e, board, issue),
-                                        onDragEnd: (e) => dragEndHandler(e),
-                                        onDragLeave: (e) => dragLeaveHandler(e),
                                         onDragOver: (e) => dragOverHandler(e),
-                                        onDrop: (e) => dropHandler(e, board, issue),
+                                        onDrop: (e) => dropColumnHandler(e, board),
                                     }}
+                                >
+                                    {Array.isArray(board.items) && board.items
+                                        .map(issue => (
+                                            <TableItem
+                                                dragProps={{
+                                                    draggable: true,
+                                                    onDragStart: (e) => dragStartHandler(e, board, issue),
+                                                    onDragEnd: (e) => dragEndHandler(e),
+                                                    onDragLeave: (e) => dragLeaveHandler(e),
+                                                    onDragOver: (e) => dragOverHandler(e),
+                                                    onDrop: (e) => dropHandler(e, board, issue),
+                                                }}
 
-                                    title={issue.title}
-                                    comments={issue.comments}
-                                    createdAt={issue.created_at}
-                                    number={issue.number}
-                                    user={issue.user.login}
-                                    key={issue.id}
-                                />
+                                                title={issue.title}
+                                                comments={issue.comments}
+                                                createdAt={issue.created_at}
+                                                number={issue.number}
+                                                user={issue.user.login}
+                                                key={issue.id}
+                                            />
+                                        ))}
+                                </TableColumn>
                             ))}
-                    </TableColumn>
-                ))}
+                        </div>
+                }
             </div>
         </div>
     );
