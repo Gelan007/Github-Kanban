@@ -1,4 +1,4 @@
-import {IssueState} from "./enums";
+import {BoardTitles, IssueState} from "./enums";
 
 export type GitHubIssue = {
     assignee: any
@@ -9,6 +9,7 @@ export type GitHubIssue = {
     user: {login: string, type: string}
     comments: number
     state: IssueState.Open | IssueState.Closed
+    storageStatus?: BoardTitles
 }
 
 export type GroupedIssues = {
@@ -18,6 +19,6 @@ export type GroupedIssues = {
 }
 
 export interface GroupedIssuesWithTitles {
-    title: string
+    title: BoardTitles
     items?: GitHubIssue[]
 }

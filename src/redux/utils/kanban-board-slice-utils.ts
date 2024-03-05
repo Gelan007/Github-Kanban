@@ -1,9 +1,6 @@
 import {GitHubIssue, GroupedIssues, GroupedIssuesWithTitles} from "../../interfaces/github";
 import {BoardTitles, IssueState} from "../../interfaces/enums";
 
-
-
-
 export const getIssueObjectFromSessionStorageIfExists = (issueId: number, sessionStorageIssues: GitHubIssue[]):
     { index: number, issue: GitHubIssue | null} => {
     const storedIssueIndex = sessionStorageIssues.findIndex(issue => issue.id === issueId);
@@ -17,22 +14,17 @@ export const getIssueObjectFromSessionStorageIfExists = (issueId: number, sessio
 export const getGroupedIssues = (issues: GitHubIssue[]): GroupedIssues => {
     const groupedIssues: GroupedIssues = {};
 
-    issues.forEach(issue => {
-        if (checkIsIssueTodo(issue)) {
-            if (!groupedIssues.todoIssues) {
-                groupedIssues.todoIssues = [];
+    issues.forEach((issue) => {
+        if (issue.storageStatus) {
+            addToGroup(groupedIssues, issue.storageStatus, issue);
+        } else {
+            if (checkIsIssueTodo(issue)) {
+                addToGroup(groupedIssues, BoardTitles.ToDo, issue);
+            } else if (checkIsIssueInProgress(issue)) {
+                addToGroup(groupedIssues, BoardTitles.InProgress, issue);
+            } else if (checkIsIssueDone(issue)) {
+                addToGroup(groupedIssues, BoardTitles.Done, issue);
             }
-            groupedIssues.todoIssues.push(issue);
-        } else if (checkIsIssueInProgress(issue)) {
-            if (!groupedIssues.inProgressIssues) {
-                groupedIssues.inProgressIssues = [];
-            }
-            groupedIssues.inProgressIssues.push(issue);
-        } else if (checkIsIssueDone(issue)) {
-            if (!groupedIssues.doneIssues) {
-                groupedIssues.doneIssues = [];
-            }
-            groupedIssues.doneIssues.push(issue);
         }
     });
 
@@ -53,6 +45,36 @@ export const getGroupedIssuesWithoutTitles = (issues: GroupedIssuesWithTitles): 
 
     return groupedIssues;
 }
+
+export const getGroupedIssuesWithTitles = (groupedIssues: GroupedIssues): GroupedIssuesWithTitles[] => {
+    const issues: GroupedIssuesWithTitles[] = [
+        {title: BoardTitles.ToDo, items: groupedIssues.todoIssues},
+        {title: BoardTitles.InProgress, items: groupedIssues.inProgressIssues},
+        {title: BoardTitles.Done, items: groupedIssues.doneIssues},
+    ]
+
+    return issues;
+}
+
+const getGroupKey = (groupTitle: BoardTitles): string => {
+    switch (groupTitle) {
+        case BoardTitles.ToDo:
+            return "todoIssues";
+        case BoardTitles.InProgress:
+            return "inProgressIssues";
+        case BoardTitles.Done:
+            return "doneIssues";
+        default:
+            return "";
+    }
+};
+
+const addToGroup = (groupedIssues: GroupedIssues, groupTitle: BoardTitles, issue: GitHubIssue) => {
+    const groupKey = getGroupKey(groupTitle) as keyof GroupedIssues;
+    groupedIssues[groupKey] = groupedIssues[groupKey] || [];
+    groupedIssues[groupKey]!.push(issue);
+};
+
 
 const checkIsIssueTodo = (issue: GitHubIssue): boolean => !issue.assignee && issue.state === IssueState.Open
 const checkIsIssueInProgress = (issue: GitHubIssue): boolean => issue.assignee && issue.state === IssueState.Open

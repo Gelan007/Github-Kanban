@@ -5,8 +5,9 @@ import {
     getGroupedIssues,
     getGroupedIssuesWithoutTitles,
     getIssueObjectFromSessionStorageIfExists
-} from "./kanban-board-utils";
+} from "../utils/kanban-board-slice-utils";
 import {BoardTitles} from "../../interfaces/enums";
+
 
 const ISSUES = "issues";
 export const getIssues = createAsyncThunk(
@@ -48,20 +49,20 @@ const kanbanBoardSlice = createSlice({
             state.issues = [...state.issues, ...action.payload]
         },
 
-        setIssueToSessionStorage: (state, action: { payload: { issue: GitHubIssue } }) => {
+        setIssueToSessionStorage: (state, action: { payload: { issue: GitHubIssue, status: BoardTitles } }) => {
             const storedIssues = state.sessionStorageIssues;
+            const issueWithStatus = {...action.payload.issue, storageStatus: action.payload.status };
             const issueData =
                 getIssueObjectFromSessionStorageIfExists(action.payload.issue.id, state.sessionStorageIssues);
 
             if (issueData.index === -1) {
-                storedIssues.push(action.payload.issue);
+                storedIssues.push(issueWithStatus);
             } else {
-                storedIssues[issueData.index] = action.payload.issue;
+                storedIssues[issueData.index] = issueWithStatus;
             }
 
             sessionStorage.setItem(ISSUES, JSON.stringify(storedIssues))
         },
-
         updateAllGroupedIssues: (state,
                            action: { payload: { groupedIssues: GroupedIssuesWithTitles[] } }
         ) => {
@@ -75,6 +76,7 @@ const kanbanBoardSlice = createSlice({
                 };
             });
         },
+
         addGroupedIssues: (state, action:{payload: {item: GitHubIssue, title: string}}) => {
             const {item, title} = action.payload;
 
@@ -121,5 +123,10 @@ const kanbanBoardSlice = createSlice({
     }
 })
 
-export const {setIssues, addMoreIssues, setIssueToSessionStorage, updateAllGroupedIssues, addGroupedIssues} = kanbanBoardSlice.actions;
+export const {setIssues,
+    addMoreIssues,
+    setIssueToSessionStorage,
+    updateAllGroupedIssues,
+    addGroupedIssues
+} = kanbanBoardSlice.actions;
 export default kanbanBoardSlice.reducer;

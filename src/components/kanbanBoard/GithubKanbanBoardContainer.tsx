@@ -8,9 +8,10 @@ import {
     addMoreIssues,
     getIssues,
     updateAllGroupedIssues,
-    addGroupedIssues
+    setIssueToSessionStorage, addGroupedIssues
 } from "../../redux/slices/kanban-board-slice";
 import {BoardTitles} from "../../interfaces/enums";
+import {getGroupedIssuesWithTitles} from "../../redux/utils/kanban-board-slice-utils";
 
 
 
@@ -25,6 +26,7 @@ type MapDispatchPropsType = {
     addMoreIssues: (issues: GitHubIssue) => void
     getIssues: (payload: {url: string, isLoadMoreData: boolean}) => void
     addGroupedIssues: (payload: {item: GitHubIssue, title: string}) => void
+    setIssueToSessionStorage: (payload: { issue: GitHubIssue, status: BoardTitles }) => void
 }
 type OwnPropsType = {}
 
@@ -68,16 +70,6 @@ const GithubKanbanBoardContainer: React.FC<BooksContainerProps> = (props) => {
         }
     }
 
-    const getGroupedIssuesWithTitles = (): GroupedIssuesWithTitles[] => {
-        const issues: GroupedIssuesWithTitles[] = [
-            {title: BoardTitles.ToDo, items: props.groupedIssues.todoIssues},
-            {title: BoardTitles.InProgress, items: props.groupedIssues.inProgressIssues},
-            {title: BoardTitles.Done, items: props.groupedIssues.doneIssues},
-        ]
-
-        return issues;
-    }
-
 
     return (
         /*<div>
@@ -91,9 +83,10 @@ const GithubKanbanBoardContainer: React.FC<BooksContainerProps> = (props) => {
         </div>*/
         <GithubKanbanBoard issues={props.issues} userInput={userInput}
                            setUserInput={setUserInput} fetchData={fetchData}
-                           boards={getGroupedIssuesWithTitles()}
+                           boards={getGroupedIssuesWithTitles(props.groupedIssues)}
                            setBoards={props.updateAllGroupedIssues}
                            addGroupedIssues={props.addGroupedIssues}
+                           setIssueToSessionStorage={props.setIssueToSessionStorage}
 
         />
     );
@@ -108,5 +101,5 @@ const mapStateToProps = (state: AppRootStateType): MapStatePropsType => {
 }
 
 export default connect<MapStatePropsType, MapDispatchPropsType, OwnPropsType, AppRootStateType>
-(mapStateToProps, {setIssues, addMoreIssues, getIssues, updateAllGroupedIssues, addGroupedIssues})(GithubKanbanBoardContainer);
+(mapStateToProps, {setIssues, addMoreIssues, getIssues, updateAllGroupedIssues, addGroupedIssues, setIssueToSessionStorage})(GithubKanbanBoardContainer);
 
