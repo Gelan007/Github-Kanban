@@ -97,11 +97,13 @@ const GithubKanbanBoard: React.FC<GithubKanbanBoardProps> = ({issues, userInput,
                 </Button>
             </InputGroup>
             {props.error
-                ?
+                &&
                 <div className={s.repoInfo}>
                     <span className={s.error}>{props.error}</span>
                 </div>
-                :
+                ||
+                issues.length > 0
+                &&
                 <div className={s.repoInfo}>
                     <a href={props.repoData.ownerLink} target="_blank" className={s.repoInfo__link}>{props.repoData.ownerName}</a>
                     <span className={s.repoInfo__text}>{'>'}</span>
@@ -113,6 +115,8 @@ const GithubKanbanBoard: React.FC<GithubKanbanBoardProps> = ({issues, userInput,
                         <span className={s.star__text}>{formattedStarsCount} stars</span>
                     </div>
                 </div>
+                ||
+                <div className={s.repoInfo}></div>
             }
             <div className={s.boardContainer}>
                 {
