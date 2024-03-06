@@ -1,6 +1,4 @@
-.githubKanbanBoard {
-
-}
+@import "../../styles/variables.scss";
 
 .topBlock {
   display: flex;
@@ -23,7 +21,7 @@
   align-items: center;
   margin: 10px 20px 30px;
   &__link {
-    color: blue;
+    color: $link;
     text-decoration: none;
 
     &:hover {
@@ -31,7 +29,7 @@
     }
   }
   &__text {
-    color: blue;
+    color: $link;
     margin: 0 5px;
   }
 }
@@ -50,7 +48,7 @@
 }
 
 .error {
-  color: red;
+  color: $error;
 }
 
 
