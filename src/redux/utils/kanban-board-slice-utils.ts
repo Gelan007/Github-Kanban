@@ -1,4 +1,4 @@
-import {GitHubIssue, GroupedIssues, GroupedIssuesWithTitles} from "../../interfaces/github";
+import {GitHubIssue, GroupedIssues, GroupedIssuesWithTitles, RepositoryData} from "../../interfaces/github";
 import {BoardTitles, IssueState} from "../../interfaces/enums";
 
 export const getIssueObjectFromSessionStorageIfExists = (issueId: number, sessionStorageIssues: GitHubIssue[]):
@@ -54,6 +54,27 @@ export const getGroupedIssuesWithTitles = (groupedIssues: GroupedIssues): Groupe
     ]
 
     return issues;
+}
+
+export const getRepoData = (url: string, starsCount: number): RepositoryData => {
+    const parts = url.split('/');
+
+    if (parts[3] === 'repos') {
+        return {
+            repoLink: `https://github.com/${parts[4]}/${parts[5]}`,
+            ownerLink: `https://github.com/${parts[4]}`,
+            repoName: parts[5],
+            ownerName: parts[4],
+            starsCount
+        };
+    }
+    return {
+        repoLink: ``,
+        ownerLink: ``,
+        repoName: "",
+        ownerName: "",
+        starsCount
+    };
 }
 
 const getGroupKey = (groupTitle: BoardTitles): string => {

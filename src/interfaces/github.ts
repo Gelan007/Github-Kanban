@@ -22,3 +22,11 @@ export interface GroupedIssuesWithTitles {
     title: BoardTitles
     items?: GitHubIssue[]
 }
+
+export type RepositoryData = {
+    repoLink: string,
+    ownerLink: string,
+    repoName: string,
+    ownerName: string
+    starsCount?: number
+}

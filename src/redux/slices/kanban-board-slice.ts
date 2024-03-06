@@ -1,26 +1,38 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import {GitHubIssue, GroupedIssues, GroupedIssuesWithTitles} from "../../interfaces/github";
+import {GitHubIssue, GroupedIssues, GroupedIssuesWithTitles, RepositoryData} from "../../interfaces/github";
 import {githubAPI} from "../../api/github";
 import {
     getGroupedIssues,
     getGroupedIssuesWithoutTitles,
-    getIssueObjectFromSessionStorageIfExists
+    getIssueObjectFromSessionStorageIfExists, getRepoData
 } from "../utils/kanban-board-slice-utils";
 import {BoardTitles} from "../../interfaces/enums";
 
 
 const ISSUES = "issues";
+
 export const getIssues = createAsyncThunk(
     'kanbanBoard/getIssues',
-    async (payload:{url: string, isLoadMoreData: boolean}, {dispatch}) => {
+    async (payload:{url: string, isLoadMoreData: boolean}, {rejectWithValue}) => {
+        try {
+            const response = await githubAPI.getIssues(payload.url, payload.isLoadMoreData)
 
-    const response = await githubAPI.getIssues(payload.url, payload.isLoadMoreData)
-    if (response.status >= 200 && response.status <= 300) {
-        return {data: response.data, link: response.headers.link, isLoadMoreData: payload.isLoadMoreData};
-    } else {
-        throw new Error('Failed to fetch issues');
-    }
-});
+            if (typeof response.data !== "string") {
+                const response = await githubAPI.getIssues(payload.url, payload.isLoadMoreData)
+                const repoResponse = await githubAPI.getRepositoryInformation(payload.url, payload.isLoadMoreData)
+                return {
+                    data: response.data,
+                    link: response.headers.link,
+                    isLoadMoreData: payload.isLoadMoreData,
+                    starsCount: repoResponse.data.stargazers_count
+                };
+            }
+            return rejectWithValue("Incorrect URL format")
+        } catch (err: any) {
+            return rejectWithValue(err.response.data)
+        }
+    });
+
 
 type KanbanBoardInitialState = {
     isLoading: boolean
@@ -29,6 +41,8 @@ type KanbanBoardInitialState = {
     sessionStorageIssues: GitHubIssue[]
     issuesHeaderLink: string
     nextPageUrl: string | null
+    error: string | null
+    repoData: RepositoryData
 }
 
 const initialState: KanbanBoardInitialState = {
@@ -37,7 +51,9 @@ const initialState: KanbanBoardInitialState = {
     issues: [],
     groupedIssues: {},
     issuesHeaderLink: "",
-    nextPageUrl: null
+    nextPageUrl: null,
+    error: null,
+    repoData: {repoLink: "", ownerLink: "", repoName: "", ownerName: "", starsCount: 0}
 }
 
 const kanbanBoardSlice = createSlice({
@@ -116,23 +132,33 @@ const kanbanBoardSlice = createSlice({
         builder
             .addCase(getIssues.pending, (state) => {
                 state.isLoading = true;
+                state.error = null;
             })
             .addCase(getIssues.fulfilled, (state, action) => {
                 state.isLoading = false;
                 const sessionStorageIssues: GitHubIssue[] = JSON.parse(sessionStorage.getItem(ISSUES) || "[]");
-
                 const updatedIssues = Array.isArray(action.payload.data) &&
                     (action.payload.data.map((serverIssue: GitHubIssue) => {
-                    const sessionIssueData =
-                        getIssueObjectFromSessionStorageIfExists(serverIssue.id, sessionStorageIssues);
-                    return sessionIssueData.issue || serverIssue;
-                })) || [];
+                        const sessionIssueData =
+                            getIssueObjectFromSessionStorageIfExists(serverIssue.id, sessionStorageIssues);
+                        return sessionIssueData.issue || serverIssue;
+                    })) || [];
 
                 state.groupedIssues = getGroupedIssues(updatedIssues)
                 state.sessionStorageIssues = sessionStorageIssues;
                 state.issues = action.payload.isLoadMoreData ? [...state.issues, ...updatedIssues] : updatedIssues;
                 state.issuesHeaderLink = action.payload.link;
+                state.repoData = getRepoData(action.payload.data[0].url, action.payload.starsCount);
+
             })
+            .addCase(getIssues.rejected, (state, action) => {
+                state.isLoading = false;
+                if(typeof action.payload === "string") {
+                    state.error = action.payload;
+                } else {
+                    state.error = "Invalid request"
+                }
+            });
     }
 })
 

@@ -1,5 +1,6 @@
 import React, {ReactNode} from 'react';
 import s from "./tableColumn.module.scss"
+import {BoardTitles} from "../../interfaces/enums";
 
 interface TableColumnProps {
     header: string
@@ -11,10 +12,19 @@ interface TableColumnProps {
 }
 
 const TableColumn:React.FC<TableColumnProps> = ({header, children, dragProps}) => {
+    const mapColumnStyle = (title: string): string => {
+        const columnStyles = {
+            [`${BoardTitles.ToDo}`]: s.blue,
+            [`${BoardTitles.InProgress}`]: s.yellow,
+            [`${BoardTitles.Done}`]: s.green,
+        }
+
+        return columnStyles[title] && columnStyles[title];
+    }
     return (
         <div className={s.tableColumn} {...dragProps}>
             <h4 className={s.header}>{header}</h4>
-            <div className={s.column}>
+            <div className={`${s.column} ${mapColumnStyle(header)}`}>
                 {children}
             </div>
         </div>

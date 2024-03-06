@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import GithubKanbanBoard from "./GithubKanbanBoard";
-import {GitHubIssue, GroupedIssues, GroupedIssuesWithTitles} from "../../interfaces/github";
+import {GitHubIssue, GroupedIssues, GroupedIssuesWithTitles, RepositoryData} from "../../interfaces/github";
 import {connect} from "react-redux";
 import {AppRootStateType} from "../../redux/store";
 import {
@@ -20,7 +20,9 @@ type MapStatePropsType = {
     issues: GitHubIssue[]
     issuesHeaderLink: string
     groupedIssues: GroupedIssues
+    repoData: RepositoryData
     isLoading: boolean
+    error: string | null
 }
 type MapDispatchPropsType = {
     setIssues: (issues: GitHubIssue) => void
@@ -48,24 +50,20 @@ const GithubKanbanBoardContainer: React.FC<BooksContainerProps> = (props) => {
         }
     };*/
 
+    useEffect(() => {
+        console.log(props.issuesHeaderLink)
+    }, [ props.issuesHeaderLink]);
 
     return (
-       /* <div>
-            <h1>GitHub Issues</h1>
-            <ul>
-                {props.issues.map((issue) => (
-                    <li key={issue.id}>{issue.title}</li>
-                ))}
-            </ul>
-            {nextPageUrl && <button onClick={loadMoreData}>Load More</button>}
-        </div>*/
         <GithubKanbanBoard issues={props.issues} userInput={userInput}
                            setUserInput={setUserInput} fetchData={fetchData}
                            boards={getGroupedIssuesWithTitles(props.groupedIssues)}
+                           repoData={props.repoData}
+                           isLoading={props.isLoading}
+                           error={props.error}
                            setBoards={props.updateAllGroupedIssues}
                            addGroupedIssues={props.addGroupedIssues}
                            setIssueToSessionStorage={props.setIssueToSessionStorage}
-                           isLoading={props.isLoading}
 
         />
     );
@@ -76,7 +74,9 @@ const mapStateToProps = (state: AppRootStateType): MapStatePropsType => {
         issues: state.kanbanBoard.issues,
         issuesHeaderLink: state.kanbanBoard.issuesHeaderLink,
         groupedIssues: state.kanbanBoard.groupedIssues,
-        isLoading: state.kanbanBoard.isLoading
+        isLoading: state.kanbanBoard.isLoading,
+        error: state.kanbanBoard.error,
+        repoData: state.kanbanBoard.repoData
     }
 }
 

@@ -3,17 +3,20 @@ import {Button, Card, Col, Container, Form, InputGroup, ListGroup, Row} from "re
 import s from "./GithubKanbanBoard.module.scss"
 import TableColumn from "../tableColumn/tableColumn";
 import TableItem, {TableItemProps} from "../tableItem/tableItem";
-import {GitHubIssue, GroupedIssuesWithTitles} from "../../interfaces/github";
+import {GitHubIssue, GroupedIssuesWithTitles, RepositoryData} from "../../interfaces/github";
 import {useBoardActions} from "../../hooks/board/useBoardActions";
 import {BoardTitles} from "../../interfaces/enums";
 import Spinner from "react-bootstrap/Spinner";
-
+import starIcon from "../../assets/images/star-icon.png";
+import {formatStarsCount} from "../../utils/count";
 
 type GithubKanbanBoardProps = {
     issues: GitHubIssue[]
     userInput: string
     boards: GroupedIssuesWithTitles[]
+    repoData: RepositoryData
     isLoading: boolean
+    error: string | null
     setUserInput: Dispatch<SetStateAction<string>>
     fetchData: () => void
     setBoards: (payload: {groupedIssues: GroupedIssuesWithTitles[]}) => void
@@ -23,6 +26,7 @@ type GithubKanbanBoardProps = {
 
 const GithubKanbanBoard: React.FC<GithubKanbanBoardProps> = ({issues, userInput, setUserInput, ...props}) => {
     const {handleDrop, handleColumnDrop} = useBoardActions();
+    const formattedStarsCount: string = props.repoData.starsCount && formatStarsCount(props.repoData.starsCount) || '0';
 
     const dragStartHandler = (e: React.DragEvent<HTMLDivElement>, board: GroupedIssuesWithTitles, item:  GitHubIssue) => {
         e.dataTransfer.setData('board', JSON.stringify(board));
@@ -92,6 +96,24 @@ const GithubKanbanBoard: React.FC<GithubKanbanBoardProps> = ({issues, userInput,
                     Load issues
                 </Button>
             </InputGroup>
+            {props.error
+                ?
+                <div className={s.repoInfo}>
+                    <span className={s.error}>{props.error}</span>
+                </div>
+                :
+                <div className={s.repoInfo}>
+                    <a href={props.repoData.ownerLink} target="_blank" className={s.repoInfo__link}>{props.repoData.ownerName}</a>
+                    <span className={s.repoInfo__text}>{'>'}</span>
+                    <a href={props.repoData.repoLink} target="_blank" className={s.repoInfo__link}>{props.repoData.repoName}</a>
+                    <div className={s.star}>
+                        <div className={s.star__icon}>
+                            <img src={starIcon} alt="star"/>
+                        </div>
+                        <span className={s.star__text}>{formattedStarsCount} stars</span>
+                    </div>
+                </div>
+            }
             <div className={s.boardContainer}>
                 {
                     props.isLoading
