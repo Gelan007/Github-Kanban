@@ -19,8 +19,6 @@ type GithubKanbanBoardProps = {
     error: string | null
     setUserInput: Dispatch<SetStateAction<string>>
     fetchData: () => void
-    setBoards: (payload: {groupedIssues: GroupedIssuesWithTitles[]}) => void
-    setIssueToSessionStorage: (payload: { issue: GitHubIssue, status: BoardTitles }) => void
 }
 
 const GithubKanbanBoard: React.FC<GithubKanbanBoardProps> = ({issues, userInput, setUserInput, ...props}) => {
@@ -132,7 +130,7 @@ const GithubKanbanBoard: React.FC<GithubKanbanBoardProps> = ({issues, userInput,
                                         onDrop: (e) => dropColumnHandler(e, board),
                                     }}
                                 >
-                                    {Array.isArray(board.items) && board.items
+                                    {!props.error && Array.isArray(board.items) && board.items
                                         .map(issue => (
                                             <TableItem
                                                 dragProps={{

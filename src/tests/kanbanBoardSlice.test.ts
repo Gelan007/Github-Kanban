@@ -1,13 +1,12 @@
 import kanbanBoardReducer, {
-    getIssues,
     setIssues,
     addMoreIssues,
     setNextPageUrl,
     setIssueToSessionStorage,
     updateAllGroupedIssues,
     addGroupedIssues, KanbanBoardInitialState,
-} from '../../redux/slices/kanban-board-slice';
-import {BoardTitles, IssueState} from "../../interfaces/enums";
+} from '../redux/slices/kanban-board-slice';
+import {BoardTitles, IssueState} from "../interfaces/enums";
 
 
 describe('Kanban Board Reducers', () => {

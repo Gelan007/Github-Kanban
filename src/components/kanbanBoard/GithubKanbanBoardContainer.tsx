@@ -49,10 +49,6 @@ const GithubKanbanBoardContainer: React.FC<BooksContainerProps> = (props) => {
         }
     };*/
 
-    useEffect(() => {
-        console.log(props.issuesHeaderLink)
-    }, [ props.issuesHeaderLink]);
-
     return (
         <GithubKanbanBoard issues={props.issues} userInput={userInput}
                            setUserInput={setUserInput} fetchData={fetchData}
@@ -60,9 +56,6 @@ const GithubKanbanBoardContainer: React.FC<BooksContainerProps> = (props) => {
                            repoData={props.repoData}
                            isLoading={props.isLoading}
                            error={props.error}
-                           setBoards={props.updateAllGroupedIssues}
-                           setIssueToSessionStorage={props.setIssueToSessionStorage}
-
         />
     );
 };

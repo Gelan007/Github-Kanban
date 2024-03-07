@@ -22,8 +22,8 @@ const TableColumn:React.FC<TableColumnProps> = ({header, children, dragProps}) =
         return columnStyles[title] && columnStyles[title];
     }
     return (
-        <div className={s.tableColumn} {...dragProps}>
-            <h4 className={s.header}>{header}</h4>
+        <div className={s.tableColumn} {...dragProps} draggable={false}>
+            <h4 className={s.header} draggable={false}>{header}</h4>
             <div className={`${s.column} ${mapColumnStyle(header)}`}>
                 {children}
             </div>
