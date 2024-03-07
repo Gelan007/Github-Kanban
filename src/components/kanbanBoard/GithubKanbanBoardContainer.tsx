@@ -29,7 +29,6 @@ type MapDispatchPropsType = {
     updateAllGroupedIssues: (payload: {groupedIssues: GroupedIssuesWithTitles[]}) => void
     addMoreIssues: (issues: GitHubIssue) => void
     getIssues: (payload: {url: string, isLoadMoreData: boolean}) => void
-    addGroupedIssues: (payload: {item: GitHubIssue, title: string}) => void
     setIssueToSessionStorage: (payload: { issue: GitHubIssue, status: BoardTitles }) => void
 }
 type OwnPropsType = {}
@@ -62,7 +61,6 @@ const GithubKanbanBoardContainer: React.FC<BooksContainerProps> = (props) => {
                            isLoading={props.isLoading}
                            error={props.error}
                            setBoards={props.updateAllGroupedIssues}
-                           addGroupedIssues={props.addGroupedIssues}
                            setIssueToSessionStorage={props.setIssueToSessionStorage}
 
         />
@@ -81,5 +79,5 @@ const mapStateToProps = (state: AppRootStateType): MapStatePropsType => {
 }
 
 export default connect<MapStatePropsType, MapDispatchPropsType, OwnPropsType, AppRootStateType>
-(mapStateToProps, {setIssues, addMoreIssues, getIssues, updateAllGroupedIssues, addGroupedIssues, setIssueToSessionStorage})(GithubKanbanBoardContainer);
+(mapStateToProps, {setIssues, addMoreIssues, getIssues, updateAllGroupedIssues, setIssueToSessionStorage})(GithubKanbanBoardContainer);
 

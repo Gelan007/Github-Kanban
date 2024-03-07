@@ -98,5 +98,5 @@ const addToGroup = (groupedIssues: GroupedIssues, groupTitle: BoardTitles, issue
 
 
 const checkIsIssueTodo = (issue: GitHubIssue): boolean => !issue.assignee && issue.state === IssueState.Open
-const checkIsIssueInProgress = (issue: GitHubIssue): boolean => issue.assignee && issue.state === IssueState.Open
+const checkIsIssueInProgress = (issue: GitHubIssue): boolean => !!issue.assignee && issue.state === IssueState.Open
 const checkIsIssueDone = (issue: GitHubIssue): boolean => issue.state === IssueState.Closed

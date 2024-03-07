@@ -20,7 +20,6 @@ type GithubKanbanBoardProps = {
     setUserInput: Dispatch<SetStateAction<string>>
     fetchData: () => void
     setBoards: (payload: {groupedIssues: GroupedIssuesWithTitles[]}) => void
-    addGroupedIssues: (payload: {item: GitHubIssue, title: string}) => void
     setIssueToSessionStorage: (payload: { issue: GitHubIssue, status: BoardTitles }) => void
 }
 

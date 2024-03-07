@@ -34,7 +34,7 @@ export const getIssues = createAsyncThunk(
     });
 
 
-type KanbanBoardInitialState = {
+export type KanbanBoardInitialState = {
     isLoading: boolean
     issues: GitHubIssue[]
     groupedIssues: GroupedIssues
@@ -82,7 +82,7 @@ const kanbanBoardSlice = createSlice({
             const storedIssues = state.sessionStorageIssues;
             const issueWithStatus = {...action.payload.issue, storageStatus: action.payload.status };
             const issueData =
-                getIssueObjectFromSessionStorageIfExists(action.payload.issue.id, state.sessionStorageIssues);
+                getIssueObjectFromSessionStorageIfExists(action.payload.issue.id, storedIssues);
 
             if (issueData.index === -1) {
                 storedIssues.push(issueWithStatus);
@@ -106,7 +106,7 @@ const kanbanBoardSlice = createSlice({
             });
         },
 
-        addGroupedIssues: (state, action:{payload: {item: GitHubIssue, title: string}}) => {
+        addGroupedIssues: (state, action:{payload: {item: GitHubIssue, title: BoardTitles}}) => {
             const {item, title} = action.payload;
 
             switch(title) {

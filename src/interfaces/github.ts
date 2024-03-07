@@ -1,7 +1,12 @@
 import {BoardTitles, IssueState} from "./enums";
-
+export type GitHubAssignee = {
+    id: number,
+    login: string,
+    type: string,
+    url: string
+}
 export type GitHubIssue = {
-    assignee: any
+    assignee: GitHubAssignee | null
     id: number
     title: string
     number: number
