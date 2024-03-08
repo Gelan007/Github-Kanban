@@ -2,10 +2,9 @@ import React, {Dispatch, SetStateAction, useEffect, useState} from 'react';
 import {Button, Card, Col, Container, Form, InputGroup, ListGroup, Row} from "react-bootstrap";
 import s from "./GithubKanbanBoard.module.scss"
 import TableColumn from "../tableColumn/tableColumn";
-import TableItem, {TableItemProps} from "../tableItem/tableItem";
+import TableItem from "../tableItem/tableItem";
 import {GitHubIssue, GroupedIssuesWithTitles, RepositoryData} from "../../interfaces/github";
 import {useBoardActions} from "../../hooks/board/useBoardActions";
-import {BoardTitles} from "../../interfaces/enums";
 import Spinner from "react-bootstrap/Spinner";
 import starIcon from "../../assets/images/star-icon.png";
 import {formatStarsCount} from "../../utils/count";

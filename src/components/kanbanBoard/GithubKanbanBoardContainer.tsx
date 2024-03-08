@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import GithubKanbanBoard from "./GithubKanbanBoard";
 import {GitHubIssue, GroupedIssues, GroupedIssuesWithTitles, RepositoryData} from "../../interfaces/github";
 import {connect} from "react-redux";
@@ -8,11 +8,10 @@ import {
     addMoreIssues,
     getIssues,
     updateAllGroupedIssues,
-    setIssueToSessionStorage, addGroupedIssues
+    setIssueToSessionStorage
 } from "../../redux/slices/kanban-board-slice";
 import {BoardTitles} from "../../interfaces/enums";
 import {getGroupedIssuesWithTitles} from "../../redux/utils/kanban-board-slice-utils";
-import Spinner from 'react-bootstrap/Spinner';
 import {useIssuesDataFetching} from "../../hooks/board/useIssuesDataFetching";
 
 
