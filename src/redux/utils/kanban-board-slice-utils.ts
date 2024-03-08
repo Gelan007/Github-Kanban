@@ -1,22 +1,13 @@
 import {GitHubIssue, GroupedIssues, GroupedIssuesWithTitles, RepositoryData} from "../../interfaces/github";
 import {BoardTitles, IssueState} from "../../interfaces/enums";
 
-export const getIssueObjectFromSessionStorageIfExists = (issueId: number, sessionStorageIssues: GitHubIssue[]):
-    { index: number, issue: GitHubIssue | null} => {
-    const storedIssueIndex = sessionStorageIssues.findIndex(issue => issue.id === issueId);
-    if (storedIssueIndex === -1) {
-        return {index: -1, issue: null}
-    }
-
-    return {index: storedIssueIndex, issue: sessionStorageIssues[storedIssueIndex]};
-}
-
-export const getGroupedIssues = (issues: GitHubIssue[]): GroupedIssues => {
+export const getGroupedIssues = (issues: GitHubIssue[], sessionStorageIssues: GroupedIssues | null): GroupedIssues => {
     const groupedIssues: GroupedIssues = {};
-
+    console.log(sessionStorageIssues)
     issues.forEach((issue) => {
-        if (issue.storageStatus) {
-            addToGroup(groupedIssues, issue.storageStatus, issue);
+        const sessionStorageObj = getIssueObjectFromSessionStorageIfExists(issue.id, sessionStorageIssues);
+        if (sessionStorageObj.issue) {
+            addToGroup(groupedIssues, sessionStorageObj.category! as BoardTitles, sessionStorageObj.issue);
         } else {
             if (checkIsIssueTodo(issue)) {
                 addToGroup(groupedIssues, BoardTitles.ToDo, issue);
@@ -30,6 +21,32 @@ export const getGroupedIssues = (issues: GitHubIssue[]): GroupedIssues => {
 
     return groupedIssues;
 };
+
+export const getIssueObjectFromSessionStorageIfExists = (issueId: number, sessionStorageIssues: GroupedIssues | null):
+    { issue: GitHubIssue | null, category: BoardTitles | null } => {
+
+    if (sessionStorageIssues) {
+        //const categories: Array<keyof GroupedIssues> = ["todoIssues", "inProgressIssues", "doneIssues"];
+        const categories: BoardTitles[] = [BoardTitles.ToDo, BoardTitles.InProgress, BoardTitles.Done];
+        let storedIssueObj: { issue: GitHubIssue | null, category: BoardTitles | null } = { issue: null, category: null };
+
+        for (const category of categories) {
+            const issues = sessionStorageIssues[getGroupKey(category)];
+
+            if (issues) {
+                const index = findIssueIndex(issues, issueId);
+                if (index !== -1) {
+                    storedIssueObj = { issue: issues[index], category: category  };
+                    break;
+                }
+            }
+        }
+
+        return storedIssueObj;
+    }
+
+    return { issue: null, category: null };
+}
 
 export const getGroupedIssuesWithoutTitles = (issues: GroupedIssuesWithTitles): GroupedIssues => {
     const groupedIssues: GroupedIssues = {}
@@ -77,7 +94,9 @@ export const getRepoData = (url: string, starsCount: number): RepositoryData => 
     };
 }
 
-const getGroupKey = (groupTitle: BoardTitles): string => {
+export const formAndGetRepositoryId = (repoName: string, ownerName: string ): string => `${repoName} ${ownerName}`;
+
+export const getGroupKey = (groupTitle: BoardTitles): keyof GroupedIssues=> {
     switch (groupTitle) {
         case BoardTitles.ToDo:
             return "todoIssues";
@@ -85,10 +104,12 @@ const getGroupKey = (groupTitle: BoardTitles): string => {
             return "inProgressIssues";
         case BoardTitles.Done:
             return "doneIssues";
-        default:
-            return "";
     }
 };
+
+const findIssueIndex = (issues: GitHubIssue[], issueId: number): number => {
+    return issues.findIndex(issue => issue.id === issueId);
+}
 
 const addToGroup = (groupedIssues: GroupedIssues, groupTitle: BoardTitles, issue: GitHubIssue) => {
     const groupKey = getGroupKey(groupTitle) as keyof GroupedIssues;

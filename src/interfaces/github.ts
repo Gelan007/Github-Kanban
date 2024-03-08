@@ -28,6 +28,10 @@ export interface GroupedIssuesWithTitles {
     items?: GitHubIssue[]
 }
 
+export interface GroupedIssuesWithRepoId extends GroupedIssues {
+    repositoryId: string
+}
+
 export type RepositoryData = {
     repoLink: string,
     ownerLink: string,

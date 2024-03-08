@@ -1,10 +1,17 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import {GitHubIssue, GroupedIssues, GroupedIssuesWithTitles, RepositoryData} from "../../interfaces/github";
+import {
+    GitHubIssue,
+    GroupedIssues,
+    GroupedIssuesWithRepoId,
+    GroupedIssuesWithTitles,
+    RepositoryData
+} from "../../interfaces/github";
 import {githubAPI} from "../../api/github";
 import {
+    formAndGetRepositoryId,
     getGroupedIssues,
-    getGroupedIssuesWithoutTitles,
-    getIssueObjectFromSessionStorageIfExists, getRepoData
+    getGroupedIssuesWithoutTitles, getGroupKey,
+    getRepoData
 } from "../utils/kanban-board-slice-utils";
 import {BoardTitles} from "../../interfaces/enums";
 
@@ -13,7 +20,7 @@ const ISSUES = "issues";
 
 export const getIssues = createAsyncThunk(
     'kanbanBoard/getIssues',
-    async (payload:{url: string, isLoadMoreData: boolean}, {rejectWithValue}) => {
+    async (payload:{url: string, isLoadMoreData: boolean}, {rejectWithValue, dispatch}) => {
         try {
             const response = await githubAPI.getIssues(payload.url, payload.isLoadMoreData)
 
@@ -38,7 +45,7 @@ export type KanbanBoardInitialState = {
     isLoading: boolean
     issues: GitHubIssue[]
     groupedIssues: GroupedIssues
-    sessionStorageIssues: GitHubIssue[]
+    sessionStorageIssues: GroupedIssuesWithRepoId | null
     issuesHeaderLink: string
     nextPageUrl: string | null
     error: string | null
@@ -47,7 +54,7 @@ export type KanbanBoardInitialState = {
 
 const initialState: KanbanBoardInitialState = {
     isLoading: false,
-    sessionStorageIssues: [],
+    sessionStorageIssues: null,
     issues: [],
     groupedIssues: {},
     issuesHeaderLink: "",
@@ -78,19 +85,30 @@ const kanbanBoardSlice = createSlice({
                 }
             }
         },
-        setIssueToSessionStorage: (state, action: { payload: { issue: GitHubIssue, status: BoardTitles } }) => {
-            const storedIssues = state.sessionStorageIssues;
-            const issueWithStatus = {...action.payload.issue, storageStatus: action.payload.status };
-            const issueData =
-                getIssueObjectFromSessionStorageIfExists(action.payload.issue.id, storedIssues);
+        changeIssueOrderInSessionStorage: (state, action: { payload: {
+                currentBoardItems:GitHubIssue[],
+                currentBoardTitle: BoardTitles,
+                boardItems: GitHubIssue[],
+                boardTitle: BoardTitles
+        } }) => {
+            const {boardItems, boardTitle, currentBoardTitle, currentBoardItems} = action.payload;
+            const boardKey = getGroupKey(boardTitle);
+            const currentBoardKey = getGroupKey(currentBoardTitle);
 
-            if (issueData.index === -1) {
-                storedIssues.push(issueWithStatus);
-            } else {
-                storedIssues[issueData.index] = issueWithStatus;
+            const updatedStoredIssues = {
+                ...state.sessionStorageIssues,
+                [currentBoardKey]: currentBoardItems,
+                [boardKey]: boardItems
             }
+            const unitedIssues: GitHubIssue[] = [
+                ...(updatedStoredIssues.todoIssues ?? []),
+                ...(updatedStoredIssues.inProgressIssues ?? []),
+                ...(updatedStoredIssues.doneIssues ?? [])
+            ];
+            state.groupedIssues = updatedStoredIssues;
+            state.issues = unitedIssues;
 
-            sessionStorage.setItem(ISSUES, JSON.stringify(storedIssues))
+            sessionStorage.setItem(ISSUES, JSON.stringify(updatedStoredIssues))
         },
         updateAllGroupedIssues: (state,
                            action: { payload: { groupedIssues: GroupedIssuesWithTitles[] } }
@@ -136,19 +154,34 @@ const kanbanBoardSlice = createSlice({
             })
             .addCase(getIssues.fulfilled, (state, action) => {
                 state.isLoading = false;
-                const sessionStorageIssues: GitHubIssue[] = JSON.parse(sessionStorage.getItem(ISSUES) || "[]");
-                const updatedIssues = Array.isArray(action.payload.data) &&
-                    (action.payload.data.map((serverIssue: GitHubIssue) => {
-                        const sessionIssueData =
-                            getIssueObjectFromSessionStorageIfExists(serverIssue.id, sessionStorageIssues);
-                        return sessionIssueData.issue || serverIssue;
-                    })) || [];
+                const repositoryData: RepositoryData = getRepoData(action.payload.data[0].url, action.payload.starsCount);
+                const sessionStorageIssues: GroupedIssuesWithRepoId | null = JSON.parse(sessionStorage.getItem(ISSUES) || "null");
+                const repositoryId = formAndGetRepositoryId(repositoryData.repoName, repositoryData.ownerName);
+                let groupedIssues: GroupedIssues;
 
-                state.groupedIssues = getGroupedIssues(updatedIssues)
-                state.sessionStorageIssues = sessionStorageIssues;
-                state.issues = action.payload.isLoadMoreData ? [...state.issues, ...updatedIssues] : updatedIssues;
+                if(sessionStorageIssues?.repositoryId === repositoryId && sessionStorageIssues) {
+                    groupedIssues = sessionStorageIssues;
+                } else {
+                    groupedIssues = getGroupedIssues(action.payload.data, sessionStorageIssues);
+                }
+
+                const groupedIssuesWithRepoId = {
+                    ...groupedIssues,
+                    repositoryId: repositoryId
+                };
+                state.groupedIssues = groupedIssues;
+                state.sessionStorageIssues = groupedIssuesWithRepoId;
+                sessionStorage.setItem(ISSUES, JSON.stringify(groupedIssuesWithRepoId))
+
+                const unitedIssues: GitHubIssue[] = [
+                    ...(groupedIssues.todoIssues ?? []),
+                    ...(groupedIssues.inProgressIssues ?? []),
+                    ...(groupedIssues.doneIssues ?? [])
+                ];
+
+                state.issues = action.payload.isLoadMoreData ? [...state.issues, ...unitedIssues] : unitedIssues;
                 state.issuesHeaderLink = action.payload.link;
-                state.repoData = getRepoData(action.payload.data[0].url, action.payload.starsCount);
+                state.repoData = repositoryData;
 
             })
             .addCase(getIssues.rejected, (state, action) => {
@@ -164,7 +197,7 @@ const kanbanBoardSlice = createSlice({
 
 export const {setIssues,
     addMoreIssues,
-    setIssueToSessionStorage,
+    changeIssueOrderInSessionStorage,
     updateAllGroupedIssues,
     addGroupedIssues,
     setNextPageUrl

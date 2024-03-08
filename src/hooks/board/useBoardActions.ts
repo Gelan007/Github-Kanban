@@ -3,7 +3,7 @@ import React from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {AppRootStateType} from "../../redux/store";
 import {getGroupedIssuesWithTitles} from "../../redux/utils/kanban-board-slice-utils";
-import {setIssueToSessionStorage, updateAllGroupedIssues} from "../../redux/slices/kanban-board-slice";
+import {changeIssueOrderInSessionStorage, updateAllGroupedIssues} from "../../redux/slices/kanban-board-slice";
 
 export const useBoardActions = () => {
     const dispatch = useDispatch();
@@ -18,8 +18,14 @@ export const useBoardActions = () => {
     ) => {
         if (currentBoardData && currentBoardData.items && currentItemData) {
             const updatedCurrentBoard: GroupedIssuesWithTitles = removeCurrentBoardDroppedItem(currentBoardData, currentItemData);
-            addItemAndUpdateAllBoards(board, item, updatedCurrentBoard, currentItemData);
-            dispatch(setIssueToSessionStorage({issue: currentItemData, status: board.title}));
+            const updatedBoardItems = addItemAndUpdateAllBoards(board, item, updatedCurrentBoard, currentItemData);
+            dispatch(changeIssueOrderInSessionStorage({
+                currentBoardItems: updatedCurrentBoard.items!,
+                currentBoardTitle: updatedCurrentBoard.title,
+                boardItems: updatedBoardItems!,
+                boardTitle: board.title
+                }
+            ));
         }
     }
 
@@ -34,7 +40,13 @@ export const useBoardActions = () => {
             const updatedBoardItems: GitHubIssue[] = getUpdatedBoardItemsForColumn(board, updatedCurrentBoard, currentItemData);
 
             formAndUpdateAllBoards(board, updatedBoardItems, updatedCurrentBoard);
-            dispatch(setIssueToSessionStorage({issue: currentItemData, status: board.title}));
+            dispatch(changeIssueOrderInSessionStorage({
+                    currentBoardItems: updatedCurrentBoard.items!,
+                    currentBoardTitle: updatedCurrentBoard.title,
+                    boardItems: updatedBoardItems!,
+                    boardTitle: board.title
+                }
+            ));
         }
     }
 
@@ -43,14 +55,16 @@ export const useBoardActions = () => {
         item: GitHubIssue,
         updatedCurrentBoard: GroupedIssuesWithTitles,
         currentItemData: GitHubIssue
-    ) => {
+    ): GitHubIssue[] | null => {
         const dropIndex = board.items?.indexOf(item)
         if (dropIndex !== undefined && dropIndex !== -1 && board.items) {
             const updatedBoardItems: GitHubIssue[] = getUpdatedBoardItems(board, updatedCurrentBoard);
             updatedBoardItems.splice(dropIndex + 1, 0, currentItemData);
 
             formAndUpdateAllBoards(board, updatedBoardItems, updatedCurrentBoard);
+            return updatedBoardItems;
         }
+        return null;
     }
 
     const removeCurrentBoardDroppedItem = (
