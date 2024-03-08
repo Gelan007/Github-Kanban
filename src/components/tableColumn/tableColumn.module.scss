@@ -14,10 +14,39 @@
   padding: 15px;
   background-color: $light-grey;
   border-radius: 15px;
-  height: 83vh;
+  border: 2px solid grey;
+  height: 76vh;
   overflow: auto;
 
   &>*:not(:last-child) {
     margin-bottom: 10px;
   }
+}
+
+.blue {
+  background-color: $background-blue;
+}
+
+.yellow {
+  background-color: $background-yellow;
+}
+
+.green {
+  background-color: $background-green;
+}
+
+.column::-webkit-scrollbar {
+  width: 12px;
+}
+.column::-webkit-scrollbar-track {
+  border-radius: 10px;
+  background-color: $scrollbar-background;
+}
+.column::-webkit-scrollbar-thumb {
+  background: $scrollbar-background-thumb;
+  border-radius: 10px;
+  border: 1px solid $scrollbar-background;
+}
+.column::-webkit-scrollbar-thumb:hover {
+  background: $scrollbar-background-thumb-hover;
 }
