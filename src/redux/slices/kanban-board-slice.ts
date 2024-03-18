@@ -2,6 +2,7 @@ import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import {GitHubIssue, GroupedIssues, GroupedIssuesWithTitles, RepositoryData} from "../../interfaces/github";
 import {githubAPI} from "../../api/github";
 import {
+    getFinalGroupedIssues,
     getGroupedIssues,
     getGroupedIssuesWithoutTitles,
     getIssueObjectFromSessionStorageIfExists, getRepoData
@@ -15,11 +16,12 @@ export const getIssues = createAsyncThunk(
     'kanbanBoard/getIssues',
     async (payload:{url: string, isLoadMoreData: boolean}, {rejectWithValue}) => {
         try {
-            const response = await githubAPI.getIssues(payload.url, payload.isLoadMoreData)
+            const response = await githubAPI.getIssues(payload.url, payload.isLoadMoreData);
 
             if (typeof response.data !== "string") {
-                const response = await githubAPI.getIssues(payload.url, payload.isLoadMoreData)
-                const repoResponse = await githubAPI.getRepositoryInformation(payload.url, payload.isLoadMoreData)
+                const response = await githubAPI.getIssues(payload.url, payload.isLoadMoreData);
+                const repoResponse = await githubAPI.getRepositoryInformation(payload.url, payload.isLoadMoreData);
+
                 return {
                     data: response.data,
                     link: response.headers.link,
@@ -27,9 +29,9 @@ export const getIssues = createAsyncThunk(
                     starsCount: repoResponse.data.stargazers_count
                 };
             }
-            return rejectWithValue("Incorrect URL format")
+            return rejectWithValue("Incorrect URL format");
         } catch (err: any) {
-            return rejectWithValue(err.response.data)
+            return rejectWithValue(err.response.data);
         }
     });
 
@@ -144,7 +146,7 @@ const kanbanBoardSlice = createSlice({
                         return sessionIssueData.issue || serverIssue;
                     })) || [];
 
-                state.groupedIssues = getGroupedIssues(updatedIssues)
+                state.groupedIssues = getFinalGroupedIssues(action.payload.isLoadMoreData, updatedIssues, state.groupedIssues);
                 state.sessionStorageIssues = sessionStorageIssues;
                 state.issues = action.payload.isLoadMoreData ? [...state.issues, ...updatedIssues] : updatedIssues;
                 state.issuesHeaderLink = action.payload.link;

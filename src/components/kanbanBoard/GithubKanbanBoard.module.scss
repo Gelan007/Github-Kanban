@@ -15,11 +15,13 @@
     border-radius: 5px;
   }
 }
+.repoInfoBlock {
+  margin: 10px 20px 30px;
+}
 
 .repoInfo {
   display: flex;
   align-items: center;
-  margin: 10px 20px 30px;
   &__link {
     color: $link;
     text-decoration: none;
@@ -32,6 +34,10 @@
     color: $link;
     margin: 0 5px;
   }
+}
+
+.buttonBlock {
+  margin-top: 15px;
 }
 
 .star {

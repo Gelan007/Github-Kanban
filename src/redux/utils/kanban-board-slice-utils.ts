@@ -12,7 +12,7 @@ export const getIssueObjectFromSessionStorageIfExists = (issueId: number, sessio
 }
 
 export const getGroupedIssues = (issues: GitHubIssue[]): GroupedIssues => {
-    const groupedIssues: GroupedIssues = {};
+    const groupedIssues: GroupedIssues = {todoIssues: [], doneIssues: [], inProgressIssues: []};
 
     issues.forEach((issue) => {
         if (issue.storageStatus) {
@@ -75,6 +75,31 @@ export const getRepoData = (url: string, starsCount: number): RepositoryData => 
         ownerName: "",
         starsCount
     };
+}
+
+export const getFinalGroupedIssues = (
+    isLoadMoreData: boolean,
+    serverIssues: GitHubIssue[],
+    stateGroupedIssues: GroupedIssues
+): GroupedIssues => {
+    const groupedIssues: GroupedIssues = getGroupedIssues(serverIssues);
+    let finalGroupedIssues: GroupedIssues = JSON.parse(JSON.stringify(stateGroupedIssues));
+
+    if (isLoadMoreData) {
+        Object.keys(stateGroupedIssues).forEach((key) => {
+            const typedKey = key as keyof GroupedIssues;
+            if (groupedIssues[typedKey]) {
+                finalGroupedIssues[typedKey]!.push(...groupedIssues[typedKey]!);
+            }
+        })
+    } else {
+        finalGroupedIssues = {
+            ...stateGroupedIssues,
+            ...groupedIssues
+        }
+    }
+
+    return finalGroupedIssues;
 }
 
 const getGroupKey = (groupTitle: BoardTitles): string => {

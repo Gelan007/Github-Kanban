@@ -22,6 +22,7 @@ type MapStatePropsType = {
     repoData: RepositoryData
     isLoading: boolean
     error: string | null
+    nextPageUrl: string | null
 }
 type MapDispatchPropsType = {
     setIssues: (issues: GitHubIssue) => void
@@ -35,18 +36,18 @@ type OwnPropsType = {}
 type BooksContainerProps = MapStatePropsType & MapDispatchPropsType & OwnPropsType
 
 const GithubKanbanBoardContainer: React.FC<BooksContainerProps> = (props) => {
-    const [userInput, setUserInput] = useState<string>('https://github.com/Gelan007/QuestRoad-front/issues');
+    const [userInput, setUserInput] = useState<string>('');
     const {handleDataFetching} = useIssuesDataFetching();
 
     const fetchData = async () => {
         await handleDataFetching(userInput, false)
     };
 
-    /*const loadMoreData = async () => {
-        if(nextPageUrl) {
-            await handleDataFetching(nextPageUrl, true)
+    const loadMoreData = async () => {
+        if(props.nextPageUrl) {
+            await handleDataFetching(props.nextPageUrl, true)
         }
-    };*/
+    };
 
     return (
         <GithubKanbanBoard issues={props.issues} userInput={userInput}
@@ -55,6 +56,7 @@ const GithubKanbanBoardContainer: React.FC<BooksContainerProps> = (props) => {
                            repoData={props.repoData}
                            isLoading={props.isLoading}
                            error={props.error}
+                           loadMoreData={loadMoreData}
         />
     );
 };
@@ -66,7 +68,8 @@ const mapStateToProps = (state: AppRootStateType): MapStatePropsType => {
         groupedIssues: state.kanbanBoard.groupedIssues,
         isLoading: state.kanbanBoard.isLoading,
         error: state.kanbanBoard.error,
-        repoData: state.kanbanBoard.repoData
+        repoData: state.kanbanBoard.repoData,
+        nextPageUrl: state.kanbanBoard.nextPageUrl
     }
 }
 
