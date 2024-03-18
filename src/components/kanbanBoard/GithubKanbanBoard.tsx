@@ -18,6 +18,7 @@ type GithubKanbanBoardProps = {
     error: string | null
     setUserInput: Dispatch<SetStateAction<string>>
     fetchData: () => void
+    loadMoreData: () => void
 }
 
 const GithubKanbanBoard: React.FC<GithubKanbanBoardProps> = ({issues, userInput, setUserInput, ...props}) => {
@@ -94,25 +95,39 @@ const GithubKanbanBoard: React.FC<GithubKanbanBoardProps> = ({issues, userInput,
             </InputGroup>
             {props.error
                 &&
-                <div className={s.repoInfo}>
+                <div className={s.repoInfoBlock}>
                     <span className={s.error}>{props.error}</span>
                 </div>
                 ||
                 issues.length > 0
                 &&
-                <div className={s.repoInfo}>
-                    <a href={props.repoData.ownerLink} target="_blank" className={s.repoInfo__link}>{props.repoData.ownerName}</a>
-                    <span className={s.repoInfo__text}>{'>'}</span>
-                    <a href={props.repoData.repoLink} target="_blank" className={s.repoInfo__link}>{props.repoData.repoName}</a>
-                    <div className={s.star}>
-                        <div className={s.star__icon}>
-                            <img src={starIcon} alt="star"/>
+                <div className={s.repoInfoBlock}>
+                    <div className={s.repoInfo}>
+                        <a href={props.repoData.ownerLink} target="_blank"
+                           className={s.repoInfo__link}>{props.repoData.ownerName}</a>
+                        <span className={s.repoInfo__text}>{'>'}</span>
+                        <a href={props.repoData.repoLink} target="_blank"
+                           className={s.repoInfo__link}>{props.repoData.repoName}</a>
+                        <div className={s.star}>
+                            <div className={s.star__icon}>
+                                <img src={starIcon} alt="star"/>
+                            </div>
+                            <span className={s.star__text}>{formattedStarsCount} stars</span>
                         </div>
-                        <span className={s.star__text}>{formattedStarsCount} stars</span>
+                    </div>
+                    <div className={s.buttonBlock}>
+                        <Button
+                            variant="primary"
+                            size="sm"
+                            style={{ borderRadius: '5px' }}
+                            onClick={props.loadMoreData}
+                        >
+                            Load more issues
+                        </Button>
                     </div>
                 </div>
                 ||
-                <div className={s.repoInfo}></div>
+                <div className={s.repoInfoBlock}></div>
             }
             <div className={s.boardContainer}>
                 {
@@ -128,6 +143,7 @@ const GithubKanbanBoard: React.FC<GithubKanbanBoardProps> = ({issues, userInput,
                                         onDragOver: (e) => dragOverHandler(e),
                                         onDrop: (e) => dropColumnHandler(e, board),
                                     }}
+                                    key={board.title}
                                 >
                                     {!props.error && Array.isArray(board.items) && board.items
                                         .map(issue => (
